@@ -1,0 +1,17 @@
+{
+  "generator-nerdery": {
+    "title": "canvas-pixels",
+    "name": "canvas-pixels",
+    "description": "HTML5 canvas pixel manipulation",
+    "version": "1.0.0",
+    "markup": "MarkupVanilla",
+    "styles": "StylesSass",
+    "scripts": "ScriptsRequireJs",
+    "framework": "FrameworkVanilla",
+    "frameworkVanillaFeatures": [
+      "modernizr",
+      "requestAnimationFrame"
+    ],
+    "scriptsVanillaNamespace": "NRD"
+  }
+}

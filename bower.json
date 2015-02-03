@@ -1,0 +1,15 @@
+{
+  "name": "canvas-pixels",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "nerdery-reset-css": "./tools/cache/nerdery-reset-css",
+    "requirejs": "2.1.9",
+    "modernizr": "components/modernizr#2.6.2",
+    "nerdery-request-animation-frame": "./tools/cache/nerdery-request-animation-frame",
+    "nerdery-function-bind": "./tools/cache/nerdery-function-bind"
+  },
+  "devDependencies": {
+    "jquery": "~2.1.3"
+  }
+}

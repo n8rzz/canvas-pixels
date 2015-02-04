@@ -14,7 +14,7 @@ define(function(require, module, exports) {
      * @param {jquery} $elementOrUndefined
      */
     var ImageManipulationController = function($elementOrUndefined) {
-        this.init();
+        this.init($elementOrUndefined);
     };
 
     var proto = ImageManipulationController.prototype;
@@ -51,6 +51,7 @@ define(function(require, module, exports) {
         this.canvas = '';
         this.ctx = '';
         this.imageObj = '';
+        this.imageData = '';
 
         return this.createChildren()
                    .enable();
@@ -64,8 +65,8 @@ define(function(require, module, exports) {
      * @chainable
      */
     proto.createChildren = function() {
-        this.elementName = 'canvasImage';
-        this.canvas = document.getElementById(this.elementName);
+        // this.elementName = 'canvasImage';
+        this.canvas = this.$element.get(0);
         this.ctx = this.canvas.getContext('2d');
         this.imageObj = new Image();
 
@@ -82,7 +83,7 @@ define(function(require, module, exports) {
      */
     proto.enable = function() {
 
-        return this;
+        return this.render();
     };
 
     /**
@@ -109,17 +110,69 @@ define(function(require, module, exports) {
         return this;
     };
 
-    proto.redraw = function() {};
+
+    proto.redraw = function() {
+        this.changeImage();
+
+        return this;
+    };
+
+
     proto.render = function() {
         var ctx = this.ctx;
-        ctx.drawImage(this.imageObj, 0, 0);
 
-        this.imageObj.onload = function() {
-            this.imageObj.src = IMAGE_SRC;
-        };
+        this.imageObj.src = IMAGE_SRC;
+        ctx.drawImage(this.imageObj, 0, 0);
 
 
         return this.redraw();
+    };
+
+
+    proto.changeImage = function() {
+        this.getImageData();
+        this.changePixels();
+
+        return this;
+    };
+
+
+    proto.getImageData = function() {
+        var ctx = this.ctx;
+        this.imageData = ctx.createImageData(this.canvas.width, this.canvas.height);
+
+        console.log(this.imageData, this.canvas.width, this.canvas.height);
+
+        // return this;
+    };
+
+    proto.setPixel = function(imageData, x, y, red, green, blue, alpha) {
+        var index = ((y * imageData.width) + x) * 4;
+        this.imageData[index] = red;
+        this.imageData[index + 1] = green;
+        this.imageData[index + 2] = blue;
+        this.imageData[index + 3] = alpha;
+
+    };
+
+
+    proto.changePixels = function() {
+        var ctx = this.ctx;
+        var width = this.canvas.width;
+        var height = this.canvas.height;
+        var index;
+
+        for (var y = 0; y < height; y++) {
+            for (var x = 0; x < width; x++) {
+                index = (y * width + x) * 4;
+
+                // console.log(x, y);
+                // this.setPixel(this.imageData, x, y, 127, 127, 127, 0.75);
+            }
+        }
+
+        ctx.putImageData(this.imageData, 0, 0);
+
     };
 
     return ImageManipulationController;

@@ -9,7 +9,7 @@ require(
     ) {
         'use strict';
 
-        var $canvasImage = '#canvasImage';
-        window.app = new App($canvasImage);
+        var $canvas = $('#canvasImage');
+        window.app = new App($canvas);
     }
 );

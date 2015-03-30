@@ -5,7 +5,6 @@ define(function(require, module, exports) {
     'use strict';
 
     var $ = require('jquery');
-    var IMAGE_SRC = 'assets/media/images/learn-all-the-canvases.jpg';
 
     /**
      * Image Manipulation Controller
@@ -13,8 +12,8 @@ define(function(require, module, exports) {
      * @class ImageManipulationController
      * @param {jquery} $elementOrUndefined
      */
-    var ImageManipulationController = function($elementOrUndefined) {
-        this.init($elementOrUndefined);
+    var ImageManipulationController = function(elementOrUndefined, $imageObjectOrUndefined) {
+        return this.init(elementOrUndefined, $imageObjectOrUndefined);
     };
 
     var proto = ImageManipulationController.prototype;
@@ -23,13 +22,11 @@ define(function(require, module, exports) {
      * Initialize the Controller
      *
      * @method init
-     * @param  {jquery} $elementOrUndefined [element|null|undefinied]
+     * @param  {jquery} elementOrUndefined [element|null|undefinied]
      * @for ImageManipulationController
      * @chainable
      */
-    proto.init = function($elementOrUndefined) {
-        console.log('-- ImageManipulationController.init()');
-
+    proto.init = function(elementOrUndefined, $imageObjectOrUndefined) {
         /**
          * Base DOM element
          *
@@ -37,21 +34,44 @@ define(function(require, module, exports) {
          * @type {jquery} #canvasImage
          * @default $elementOrUndefined || null;
          */
-        this.$element = $elementOrUndefined || null;
+        this.element = elementOrUndefined || null;
+        /**
+         * Image object with information to be manipulated
+         *
+         * @param $imageObject
+         * @type {jquery} <img />
+         * @default $imageObjectOrUndefined || null;
+         */
+        this.$imageObject = $imageObjectOrUndefined || null;
 
         /**
-         * Canvas element name
-         *
-         * @property elementName
-         * @type {String}
-         * @default null
+         * @param canvas
+         * @type {string}
          */
-        this.elementName = '';
-
         this.canvas = '';
+        /**
+         * @param ctx
+         * @type {string}
+         */
         this.ctx = '';
-        this.imageObj = '';
-        this.imageData = '';
+        /**
+         * Canvas width
+         * @param width
+         * @type {number}
+         */
+        this.width = -1;
+        /**
+         * Canvas Height
+         * @param height
+         * @type {number}
+         */
+        this.height = -1;
+        /**
+         * @param imageObjectData
+         * @type {string}
+         */
+        this.imageObjectData = '';
+
 
         return this.createChildren()
                    .enable();
@@ -65,11 +85,12 @@ define(function(require, module, exports) {
      * @chainable
      */
     proto.createChildren = function() {
-        // this.elementName = 'canvasImage';
-        this.canvas = this.$element.get(0);
+        this.canvas = document.getElementById(this.element);
         this.ctx = this.canvas.getContext('2d');
-        this.imageObj = new Image();
+        this.width = this.$imageObject.width;
+        this.height = this.$imageObject.height;
 
+        this.ctx.drawImage(this.$imageObject, 0, 0);
 
         return this;
     };
@@ -83,7 +104,7 @@ define(function(require, module, exports) {
      */
     proto.enable = function() {
 
-        return this.render();
+        return this.drawModifiedImage();
     };
 
     /**
@@ -99,80 +120,68 @@ define(function(require, module, exports) {
     };
 
     /**
-     * Destroys the controller and any child elements
+     * Destroys the controller and tears down any child elements
      *
      * @method destroy
      * @for ImageManipulationController
      * @chainable
      */
     proto.destroy = function() {
+        this.element = null;
+        this.$imageObject = null;
+        this.canvas = '';
+        this.ctx = '';
+        this.width = -1;
+        this.height = -1;
+        this.imageObjectData = '';
+
 
         return this;
     };
 
+    /**
+     * Places modified image in the view after the image data has been changed
+     *
+     * @method drawModifiedImage
+     * @for ImageManipulationController
+     * @chainable
+     */
+    proto.drawModifiedImage = function() {
+        var ctx = this.ctx;
 
-    proto.redraw = function() {
-        this.changeImage();
+        this.imageObjectData = ctx.getImageData(0, 0, this.width, this.height);
+        this.modifyImagePixels(this.imageObjectData.data);
+
+        ctx.putImageData(this.imageObjectData, 0, 0);
 
         return this;
     };
 
+    /**
+     * Loop through every 4th row and move pixel by pixel
+     * manipulating each pixel in the row
+     *
+     * @method modifyImagePixels
+     * @param dataToModify
+     * @for ImageManipulationController
+     * @chainable
+     */
+    proto.modifyImagePixels = function(dataToModify) {
+        var h;
+        var w;
+        var i;
+        var data = dataToModify;
 
-    proto.render = function() {
-        var ctx = this.ctx;
-
-        this.imageObj.src = IMAGE_SRC;
-        ctx.drawImage(this.imageObj, 0, 0);
-
-
-        return this.redraw();
-    };
-
-
-    proto.changeImage = function() {
-        this.getImageData();
-        this.changePixels();
-
-        return this;
-    };
-
-
-    proto.getImageData = function() {
-        var ctx = this.ctx;
-        this.imageData = ctx.createImageData(this.canvas.width, this.canvas.height);
-
-        console.log(this.imageData, this.canvas.width, this.canvas.height);
-
-        // return this;
-    };
-
-    proto.setPixel = function(imageData, x, y, red, green, blue, alpha) {
-        var index = ((y * imageData.width) + x) * 4;
-        this.imageData[index] = red;
-        this.imageData[index + 1] = green;
-        this.imageData[index + 2] = blue;
-        this.imageData[index + 3] = alpha;
-
-    };
-
-
-    proto.changePixels = function() {
-        var ctx = this.ctx;
-        var width = this.canvas.width;
-        var height = this.canvas.height;
-        var index;
-
-        for (var y = 0; y < height; y++) {
-            for (var x = 0; x < width; x++) {
-                index = (y * width + x) * 4;
-
-                // console.log(x, y);
-                // this.setPixel(this.imageData, x, y, 127, 127, 127, 0.75);
+        for (h = 0; h < this.height; h +=4) {
+            for (w = 0; w < this.width; w ++) {
+                i = (h * this.width + w) * 4;
+                data[i] = 255 - data[i];
+                data[i + 1] = 255 - data[i + 1];
+                data[i + 2] = 255 - data[i + 2];
             }
         }
 
-        ctx.putImageData(this.imageData, 0, 0);
-
+        return this;
     };
 
     return ImageManipulationController;

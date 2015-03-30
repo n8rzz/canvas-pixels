@@ -6,20 +6,21 @@
   "dependencies": {},
   "devDependencies": {
     "grunt": "0.4.5",
-    "shelljs": "0.3.0",
-    "grunt-contrib-clean": "0.5.0",
-    "grunt-contrib-watch": "0.5.3",
-    "jit-grunt": "0.8.0",
-    "time-grunt": "0.4.0",
-    "grunt-contrib-copy": "0.4.1",
-    "grunt-usemin": "2.3.0",
     "grunt-bower-install": "1.0.0",
-    "grunt-force": "1.0.0",
-    "grunt-sass": "0.12.1",
     "grunt-bower-requirejs": "0.7.1",
+    "grunt-contrib-clean": "0.5.0",
+    "grunt-contrib-copy": "0.4.1",
     "grunt-contrib-jshint": "0.7.2",
     "grunt-contrib-requirejs": "0.4.1",
-    "grunt-contrib-yuidoc": "0.5.0"
+    "grunt-contrib-watch": "0.5.3",
+    "grunt-contrib-yuidoc": "0.5.0",
+    "grunt-force": "1.0.0",
+    "grunt-sass": "^0.18.1",
+    "grunt-usemin": "2.3.0",
+    "jit-grunt": "0.8.0",
+    "node-sass": "^2.1.1",
+    "shelljs": "0.3.0",
+    "time-grunt": "0.4.0"
   },
   "scripts": {
     "postinstall": "node tools/npm-postinstall"

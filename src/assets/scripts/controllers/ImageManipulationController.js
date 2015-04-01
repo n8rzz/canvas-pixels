@@ -71,6 +71,11 @@ define(function(require, module, exports) {
          * @type {string}
          */
         this.imageObjectData = '';
+        /**
+         * @param invertedRowWidth
+         * @type {Number}
+         */
+        this.invertedRowWidth = -1;
 
 
         return this.createChildren()
@@ -78,7 +83,7 @@ define(function(require, module, exports) {
     };
 
     /**
-     * Creates child elements
+     * Create child elements and DOM references
      *
      * @method createChildren
      * @for ImageManipulationController
@@ -89,6 +94,7 @@ define(function(require, module, exports) {
         this.ctx = this.canvas.getContext('2d');
         this.width = this.$imageObject.width;
         this.height = this.$imageObject.height;
+        this.invertedRowWidth = 4;
 
         this.ctx.drawImage(this.$imageObject, 0, 0);
 
@@ -96,7 +102,7 @@ define(function(require, module, exports) {
     };
 
     /**
-     * Enables the controller
+     * Enable the controller
      *
      * @method enable
      * @for ImageManipulationController
@@ -108,7 +114,7 @@ define(function(require, module, exports) {
     };
 
     /**
-     * Disables the controller
+     * Disable the controller
      *
      * @method disable
      * @for ImageManipulationController
@@ -120,7 +126,7 @@ define(function(require, module, exports) {
     };
 
     /**
-     * Destroys the controller and tears down any child elements
+     * Destroy the controller and tears down any child elements
      *
      * @method destroy
      * @for ImageManipulationController
@@ -134,7 +140,7 @@ define(function(require, module, exports) {
         this.width = -1;
         this.height = -1;
         this.imageObjectData = '';
-
+        this.invertedRowWidth = -1;
 
         return this;
     };
@@ -168,29 +174,44 @@ define(function(require, module, exports) {
      */
     proto.modifyImagePixels = function(dataToModify) {
         var h;
-        var w;
-        var i;
-        var data = dataToModify;
+        var doubleRowWidth = this.invertedRowWidth * 2;
 
-        for (h = 0; h < this.height; h +=4) {
-            if (h % 8 === 0) {
+        for (h = 0; h < this.height; h += this.invertedRowWidth) {
+            if (h % doubleRowWidth === 0) {
                 do {
                     h++;
-                    console.log(h, h % 8);
+                    this.modifyImagePixelsInRow(h, dataToModify);
 
-                    for (w = 0; w < this.width; w ++) {
-                        i = (h * this.width + w) * 4;
-                        data[i] = 255 - data[i];
-                        data[i + 1] = 255 - data[i + 1];
-                        data[i + 2] = 255 - data[i + 2];
-                    }
-                } while (h % 8 !== 4);
+                } while (h % doubleRowWidth !== this.invertedRowWidth);
             }
         }
 
         return this;
     };
 
+    /**
+     * Step through each pixel in the row and invert the rgb color values
+     *
+     * @method modifyImagePixelsInRow
+     * @param heightIndex
+     * @param pixelDataToModify
+     * @for ImageManipulationController
+     * @chainable
+     */
+    proto.modifyImagePixelsInRow = function(heightIndex, pixelDataToModify) {
+        var w;
+        var h = heightIndex;
+        var i;
+        var data = pixelDataToModify;
+
+        for (w = 0; w < this.width; w ++) {
+            i = (h * this.width + w) * 4;
+            data[i] = 255 - data[i];
+            data[i + 1] = 255 - data[i + 1];
+            data[i + 2] = 255 - data[i + 2];
+        }
+        return this;
+    };
 
 
     return ImageManipulationController;

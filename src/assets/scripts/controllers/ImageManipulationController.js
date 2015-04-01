@@ -173,16 +173,25 @@ define(function(require, module, exports) {
         var data = dataToModify;
 
         for (h = 0; h < this.height; h +=4) {
-            for (w = 0; w < this.width; w ++) {
-                i = (h * this.width + w) * 4;
-                data[i] = 255 - data[i];
-                data[i + 1] = 255 - data[i + 1];
-                data[i + 2] = 255 - data[i + 2];
+            if (h % 8 === 0) {
+                do {
+                    h++;
+                    console.log(h, h % 8);
+
+                    for (w = 0; w < this.width; w ++) {
+                        i = (h * this.width + w) * 4;
+                        data[i] = 255 - data[i];
+                        data[i + 1] = 255 - data[i + 1];
+                        data[i + 2] = 255 - data[i + 2];
+                    }
+                } while (h % 8 !== 4);
             }
         }
 
         return this;
     };
+
+
 
     return ImageManipulationController;
 });

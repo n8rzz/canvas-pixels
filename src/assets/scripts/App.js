@@ -39,6 +39,12 @@ define(function(require, exports, module) { // jshint ignore:line
          */
         this.$element = $elementOrUndefined || null;
 
+        /**
+         *
+         * @type {Object}
+         */
+        this.imageManipulationController = null;
+
 
         return this.createChildren()
                     .enable();
@@ -88,6 +94,7 @@ define(function(require, exports, module) { // jshint ignore:line
         var $imageObject = new Image();
 
         $($imageObject).load(function() {
+            debugger;
             this.imageManipulationController = new ImageManipulationController($element.attr('Id'), $imageObject);
         });
 

@@ -1,0 +1,18 @@
+window != var App = new App()
+
+setupHandlers prebind this.imagemanipulation
+
+jquery objects only $
+
+
+
+
+####
+
+iterate over pixels, l -> r, t -> b
+enumerate pixel positions [Red, GREEN, etx]
+figure out back buffering (render maintaining integrety of source image)
+jquery objects and not
+fix poor var names
+fix call structure
+don't modify i inside of another loop

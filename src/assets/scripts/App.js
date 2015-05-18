@@ -51,6 +51,16 @@ define(function(require, exports, module) { // jshint ignore:line
     };
 
     /**
+     *
+     *
+     * @method setupHandlers
+     * @chainable
+     */
+    proto.setupHandlers = function() {
+       this.imageManipulationController.bind(this);
+    };
+
+    /**
      * Create any child references
      *
      * @method createChildren
@@ -91,14 +101,15 @@ define(function(require, exports, module) { // jshint ignore:line
      */
     proto.render = function() {
         var $element = this.$element;
-        var $imageObject = new Image();
+        var imageObject = new Image();
 
-        $($imageObject).load(function() {
+        $(imageObject).load(function() {
             debugger;
-            this.imageManipulationController = new ImageManipulationController($element.attr('Id'), $imageObject);
+            this.imageManipulationController = new ImageManipulationController($element.attr('id'), imageObject);
         });
 
-        $imageObject.src = IMAGE_SRC;
+        imageObject.src = IMAGE_SRC;
+
 
         return this.redraw();
     };

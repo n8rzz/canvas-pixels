@@ -10,10 +10,11 @@ define(function(require, module, exports) {
      * Image Manipulation Controller
      *
      * @class ImageManipulationController
-     * @param {jquery} $elementOrUndefined
+     * @param {string} elementOrUndefined
+     * @param {string} imageObjectOrUndefined
      */
-    var ImageManipulationController = function(elementOrUndefined, $imageObjectOrUndefined) {
-        return this.init(elementOrUndefined, $imageObjectOrUndefined);
+    var ImageManipulationController = function(elementOrUndefined, imageObjectOrUndefined) {
+        return this.init(elementOrUndefined, imageObjectOrUndefined);
     };
 
     var proto = ImageManipulationController.prototype;
@@ -22,27 +23,28 @@ define(function(require, module, exports) {
      * Initialize the Controller
      *
      * @method init
-     * @param  {jquery} elementOrUndefined [element|null|undefinied]
+     * @param  {string} elementOrUndefined [element|null|undefinied]
+     * @param {string} imageObjectOrUndefined
      * @for ImageManipulationController
      * @chainable
      */
-    proto.init = function(elementOrUndefined, $imageObjectOrUndefined) {
+    proto.init = function(elementOrUndefined, imageObjectOrUndefined) {
         /**
          * Base DOM element
          *
          * @param $element
-         * @type {jquery} #canvasImage
+         * @type {string} #canvasImage
          * @default $elementOrUndefined || null;
          */
         this.element = elementOrUndefined || null;
         /**
          * Image object with information to be manipulated
          *
-         * @param $imageObject
-         * @type {jquery} <img />
-         * @default $imageObjectOrUndefined || null;
+         * @param imageObject
+         * @type {string} <img/>
+         * @default imageObjectOrUndefined || null;
          */
-        this.$imageObject = $imageObjectOrUndefined || null;
+        this.imageObject = imageObjectOrUndefined || null;
 
         /**
          * @param canvas
@@ -50,10 +52,10 @@ define(function(require, module, exports) {
          */
         this.canvas = '';
         /**
-         * @param ctx
+         * @param context
          * @type {string}
          */
-        this.ctx = '';
+        this.context = '';
         /**
          * Canvas width
          * @param width
@@ -72,10 +74,10 @@ define(function(require, module, exports) {
          */
         this.imageObjectData = '';
         /**
-         * @param invertedRowWidth
+         * @param invertedRowHeight
          * @type {Number}
          */
-        this.invertedRowWidth = -1;
+        this.invertedRowHeight = -1;
 
 
         return this.createChildren()
@@ -91,12 +93,12 @@ define(function(require, module, exports) {
      */
     proto.createChildren = function() {
         this.canvas = document.getElementById(this.element);
-        this.ctx = this.canvas.getContext('2d');
-        this.width = this.$imageObject.width;
-        this.height = this.$imageObject.height;
-        this.invertedRowWidth = 4;
+        this.context = this.canvas.getContext('2d');
+        this.width = this.imageObject.width;
+        this.height = this.imageObject.height;
+        this.invertedRowHeight = 4;
 
-        this.ctx.drawImage(this.$imageObject, 0, 0);
+        this.context.drawImage(this.imageObject, 0, 0);
 
         return this;
     };
@@ -134,13 +136,13 @@ define(function(require, module, exports) {
      */
     proto.destroy = function() {
         this.element = null;
-        this.$imageObject = null;
+        this.imageObject = null;
         this.canvas = '';
-        this.ctx = '';
+        this.context = '';
         this.width = -1;
         this.height = -1;
         this.imageObjectData = '';
-        this.invertedRowWidth = -1;
+        this.invertedRowHeight = -1;
 
         return this;
     };
@@ -153,12 +155,12 @@ define(function(require, module, exports) {
      * @chainable
      */
     proto.drawModifiedImage = function() {
-        var ctx = this.ctx;
+        var context = this.context;
 
-        this.imageObjectData = ctx.getImageData(0, 0, this.width, this.height);
+        this.imageObjectData = context.getImageData(0, 0, this.width, this.height);
         this.modifyImagePixels(this.imageObjectData.data);
 
-        ctx.putImageData(this.imageObjectData, 0, 0);
+        context.putImageData(this.imageObjectData, 0, 0);
 
         return this;
     };
@@ -174,15 +176,15 @@ define(function(require, module, exports) {
      */
     proto.modifyImagePixels = function(dataToModify) {
         var h;
-        var doubleRowWidth = this.invertedRowWidth * 2;
+        var doubleRowWidth = this.invertedRowHeight * 2;
 
-        for (h = 0; h < this.height; h += this.invertedRowWidth) {
+        for (h = 0; h < this.height; h += this.invertedRowHeight) {
             if (h % doubleRowWidth === 0) {
                 do {
                     h++;
                     this.modifyImagePixelsInRow(h, dataToModify);
 
-                } while (h % doubleRowWidth !== this.invertedRowWidth);
+                } while (h % doubleRowWidth !== this.invertedRowHeight);
             }
         }
 

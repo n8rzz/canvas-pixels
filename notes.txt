@@ -1,6 +1,6 @@
 window != var App = new App()
 
-setupHandlers prebind this.imagemanipulation
+/setupHandlers prebind this.imagemanipulation
 
 jquery objects only $
 

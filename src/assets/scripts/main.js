@@ -10,6 +10,6 @@ require(
         'use strict';
 
         var $canvas = $('#canvasImage');
-        window.app = new App($canvas);
+        var app = new App($canvas);
     }
 );

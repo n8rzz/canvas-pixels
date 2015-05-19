@@ -7,6 +7,18 @@ define(function(require, module, exports) {
     var $ = require('jquery');
 
     /**
+     *
+     * @type {{RED: number, GREEN: number, BLUE: number}}
+     */
+    var RGB_COLORS = {
+        RED: 0,
+        GREEN: 1,
+        BLUE: 2,
+        ALPHA: 3,
+        COMPONENTS: 4
+    };
+
+    /**
      * Image Manipulation Controller
      *
      * @class ImageManipulationController
@@ -32,19 +44,25 @@ define(function(require, module, exports) {
         /**
          * Base DOM element
          *
-         * @param $element
+         * @param element
          * @type {string} #canvasImage
-         * @default $elementOrUndefined || null;
+         * @default elementOrUndefined || null;
          */
         this.element = elementOrUndefined || null;
         /**
          * Image object with information to be manipulated
          *
          * @param imageObject
-         * @type {string} <img/>
+         * @type {object} <img/>
          * @default imageObjectOrUndefined || null;
          */
         this.imageObject = imageObjectOrUndefined || null;
+
+        /**
+         * @param copyOfImageObject
+         * @type {null}
+         */
+        this.copyOfImageObject = null;
 
         /**
          * @param canvas
@@ -79,7 +97,6 @@ define(function(require, module, exports) {
          */
         this.invertedRowHeight = -1;
 
-
         return this.createChildren()
                    .enable();
     };
@@ -94,6 +111,7 @@ define(function(require, module, exports) {
     proto.createChildren = function() {
         this.canvas = document.getElementById(this.element);
         this.context = this.canvas.getContext('2d');
+        this.copyOfImageObject = this.imageObject;
         this.width = this.imageObject.width;
         this.height = this.imageObject.height;
         this.invertedRowHeight = 4;
@@ -143,6 +161,7 @@ define(function(require, module, exports) {
         this.height = -1;
         this.imageObjectData = '';
         this.invertedRowHeight = -1;
+        this.copyOfImageObject = null;
 
         return this;
     };
@@ -175,16 +194,15 @@ define(function(require, module, exports) {
      * @chainable
      */
     proto.modifyImagePixels = function(dataToModify) {
-        var h;
-        var doubleRowWidth = this.invertedRowHeight * 2;
+        var heightIndex;
+        var doubleRowHeight = this.invertedRowHeight * 2;
 
-        for (h = 0; h < this.height; h += this.invertedRowHeight) {
-            if (h % doubleRowWidth === 0) {
-                do {
-                    h++;
-                    this.modifyImagePixelsInRow(h, dataToModify);
+        for (heightIndex = 0; heightIndex < this.height; heightIndex++) {
+            if (heightIndex % doubleRowHeight >= (doubleRowHeight / 2) &&
+                heightIndex % doubleRowHeight <= (doubleRowHeight - 1)) {
 
-                } while (h % doubleRowWidth !== this.invertedRowHeight);
+                this.modifyImagePixelsInRow(heightIndex, dataToModify);
+
             }
         }
 
@@ -201,16 +219,15 @@ define(function(require, module, exports) {
      * @chainable
      */
     proto.modifyImagePixelsInRow = function(heightIndex, pixelDataToModify) {
-        var w;
-        var h = heightIndex;
+        var widthIndex;
         var i;
         var data = pixelDataToModify;
 
-        for (w = 0; w < this.width; w ++) {
-            i = (h * this.width + w) * 4;
-            data[i] = 255 - data[i];
-            data[i + 1] = 255 - data[i + 1];
-            data[i + 2] = 255 - data[i + 2];
+        for (widthIndex = 0; widthIndex < this.width; widthIndex++) {
+            i = (heightIndex * this.width + widthIndex) * 4;
+            data[i + RGB_COLORS.RED] = 255 - data[i + RGB_COLORS.RED];
+            data[i + RGB_COLORS.GREEN] = 255 - data[i + RGB_COLORS.GREEN];
+            data[i + RGB_COLORS.BLUE] = 255 - data[i + RGB_COLORS.BLUE];
         }
         return this;
     };

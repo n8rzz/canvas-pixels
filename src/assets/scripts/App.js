@@ -104,7 +104,6 @@ define(function(require, exports, module) { // jshint ignore:line
         var imageObject = new Image();
 
         $(imageObject).load(function() {
-            debugger;
             this.imageManipulationController = new ImageManipulationController($element.attr('id'), imageObject);
         });
 

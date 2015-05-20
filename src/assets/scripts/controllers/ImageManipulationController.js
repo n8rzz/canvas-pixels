@@ -194,15 +194,17 @@ define(function(require, module, exports) {
      * @chainable
      */
     proto.modifyImagePixels = function(dataToModify) {
-        var heightIndex;
+        var x;
+        var y;
         var doubleRowHeight = this.invertedRowHeight * 2;
 
-        for (heightIndex = 0; heightIndex < this.height; heightIndex++) {
-            if (heightIndex % doubleRowHeight >= (doubleRowHeight / 2) &&
-                heightIndex % doubleRowHeight <= (doubleRowHeight - 1)) {
+        for (y = 0; y < this.height; y++) {
+            for (x = 0; x < this.width; x++) {
 
-                this.modifyImagePixelsInRow(heightIndex, dataToModify);
+                if (y % doubleRowHeight >= (doubleRowHeight / 2) && y % doubleRowHeight <= (doubleRowHeight - 1)) {
+                    this.modifyImagePixelsInRow(x, y, dataToModify);
 
+                }
             }
         }
 
@@ -210,25 +212,24 @@ define(function(require, module, exports) {
     };
 
     /**
-     * Step through each pixel in the row and invert the rgb color values
+     * Step through each pixel by channel and change pixel value
      *
      * @method modifyImagePixelsInRow
-     * @param heightIndex
+     * @param x
+     * @param y
      * @param pixelDataToModify
      * @for ImageManipulationController
      * @chainable
      */
-    proto.modifyImagePixelsInRow = function(heightIndex, pixelDataToModify) {
-        var widthIndex;
+    proto.modifyImagePixelsInRow = function(x, y, pixelDataToModify) {
         var i;
         var data = pixelDataToModify;
 
-        for (widthIndex = 0; widthIndex < this.width; widthIndex++) {
-            i = (heightIndex * this.width + widthIndex) * 4;
-            data[i + RGB_COLORS.RED] = 255 - data[i + RGB_COLORS.RED];
-            data[i + RGB_COLORS.GREEN] = 255 - data[i + RGB_COLORS.GREEN];
-            data[i + RGB_COLORS.BLUE] = 255 - data[i + RGB_COLORS.BLUE];
-        }
+        i = (y * this.width + x) * RGB_COLORS.COMPONENTS;
+        data[i + RGB_COLORS.RED] = 255 - data[i + RGB_COLORS.RED];
+        data[i + RGB_COLORS.GREEN] = 255 - data[i + RGB_COLORS.GREEN];
+        data[i + RGB_COLORS.BLUE] = 255 - data[i + RGB_COLORS.BLUE];
+
         return this;
     };
 

@@ -57,7 +57,7 @@ define(function(require, exports, module) { // jshint ignore:line
      * @chainable
      */
     proto.setupHandlers = function() {
-       this.imageManipulationController.bind(this);
+       this.imageManipulationController = this.imageManipulationController.bind(this);
     };
 
     /**

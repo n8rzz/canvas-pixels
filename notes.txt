@@ -17,7 +17,7 @@ fix call structure
 
 ###
 
-loop through rows and columns, then do condition
+/loop through rows and columns, then do condition
 find repeatable pattern, write fn for it
-ln 107, rework bind
-x & y for height and width
+/ln 107, rework bind
+/x & y for height and width

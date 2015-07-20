@@ -57,7 +57,8 @@ define(function(require, exports, module) { // jshint ignore:line
      * @chainable
      */
     proto.setupHandlers = function() {
-       this.imageManipulationController = this.imageManipulationController.bind(this);
+        this._onImageLoadHandler = $.proxy(this._onImageLoad, this);
+        this.imageManipulationControllerHandler = $.proxy(this.imageManipulationController, this);
     };
 
     /**
@@ -78,6 +79,12 @@ define(function(require, exports, module) { // jshint ignore:line
      * @chainable
      */
     proto.enable = function() {
+        this.imageObject = new Image();
+        $(this.imageObject).load(function() {
+            this._onImageLoadHandler;
+        }, false);
+
+        this.imageObject.src = IMAGE_SRC;
 
         return this.render();
     };
@@ -100,17 +107,16 @@ define(function(require, exports, module) { // jshint ignore:line
      * @chainable
      */
     proto.render = function() {
-        var $element = this.$element;
-        var imageObject = new Image();
-
-        $(imageObject).load(function() {
-            this.imageManipulationController = new ImageManipulationController($element.attr('id'), imageObject);
-        });
-
-        imageObject.src = IMAGE_SRC;
+        this.imageManipulationController = new ImageManipulationController(this.$element.attr('id'), this.imageObject);
 
 
         return this.redraw();
+    };
+
+    proto._onImageLoad = function() {
+        console.log('onLoad');
+
+        return this;
     };
 
     return App;

@@ -35,7 +35,7 @@ define(function(require, module, exports) {
      * Initialize the Controller
      *
      * @method init
-     * @param  {string} elementOrUndefined [element|null|undefinied]
+     * @param  {string} elementOrUndefined [element|null|undefined]
      * @param {string} imageObjectOrUndefined
      * @for ImageManipulationController
      * @chainable
@@ -130,7 +130,7 @@ define(function(require, module, exports) {
      */
     proto.enable = function() {
 
-        return this.drawModifiedImage();
+        return this; //.drawModifiedImage();
     };
 
     /**
@@ -175,8 +175,8 @@ define(function(require, module, exports) {
      */
     proto.drawModifiedImage = function() {
         var context = this.context;
-
         this.imageObjectData = context.getImageData(0, 0, this.width, this.height);
+
         this.modifyImagePixels(this.imageObjectData.data);
 
         context.putImageData(this.imageObjectData, 0, 0);
@@ -201,10 +201,12 @@ define(function(require, module, exports) {
         for (y = 0; y < this.height; y++) {
             for (x = 0; x < this.width; x++) {
 
-                if (y % doubleRowHeight >= (doubleRowHeight / 2) && y % doubleRowHeight <= (doubleRowHeight - 1)) {
+                if (y % doubleRowHeight >= this.invertedRowHeight &&
+                    y % doubleRowHeight <= (doubleRowHeight - 1)) {
                     this.modifyImagePixelsInRow(x, y, dataToModify);
 
                 }
+
             }
         }
 

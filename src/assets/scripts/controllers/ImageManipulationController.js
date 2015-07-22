@@ -114,9 +114,6 @@ define(function(require, module, exports) {
         this.copyOfImageObject = this.imageObject;
         this.width = this.imageObject.width;
         this.height = this.imageObject.height;
-        this.invertedRowHeight = 4;
-
-        this.context.drawImage(this.imageObject, 0, 0);
 
         return this;
     };
@@ -130,7 +127,7 @@ define(function(require, module, exports) {
      */
     proto.enable = function() {
 
-        return this; //.drawModifiedImage();
+        return this.drawOriginalImage();
     };
 
     /**
@@ -166,6 +163,15 @@ define(function(require, module, exports) {
         return this;
     };
 
+    proto.drawOriginalImage = function() {
+        console.log('originalDraw');
+        var context = this.context;
+        this.imageObjectData = context.getImageData(0, 0, this.width, this.height);
+        context.drawImage(this.imageObject, 0, 0);
+
+        return this;
+    };
+
     /**
      * Places modified image in the view after the image data has been changed
      *
@@ -174,8 +180,10 @@ define(function(require, module, exports) {
      * @chainable
      */
     proto.drawModifiedImage = function() {
+        console.log('modifiedDraw');
         var context = this.context;
         this.imageObjectData = context.getImageData(0, 0, this.width, this.height);
+        this.invertedRowHeight = 4;
 
         this.modifyImagePixels(this.imageObjectData.data);
 
@@ -206,7 +214,6 @@ define(function(require, module, exports) {
                     this.modifyImagePixelsInRow(x, y, dataToModify);
 
                 }
-
             }
         }
 

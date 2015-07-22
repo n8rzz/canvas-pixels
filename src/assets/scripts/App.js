@@ -39,6 +39,8 @@ define(function(require, exports, module) { // jshint ignore:line
          */
         this.$element = $elementOrUndefined || null;
 
+        this.imageObject = null;
+
         /**
          *
          * @type {Object}
@@ -46,7 +48,8 @@ define(function(require, exports, module) { // jshint ignore:line
         this.imageManipulationController = null;
 
 
-        return this.createChildren()
+        return this.setupHandlers()
+                    .createChildren()
                     .enable();
     };
 
@@ -59,6 +62,8 @@ define(function(require, exports, module) { // jshint ignore:line
     proto.setupHandlers = function() {
         this._onImageLoadHandler = $.proxy(this._onImageLoad, this);
         this.imageManipulationControllerHandler = $.proxy(this.imageManipulationController, this);
+
+        return this;
     };
 
     /**
@@ -68,6 +73,9 @@ define(function(require, exports, module) { // jshint ignore:line
      * @chainable
      */
     proto.createChildren = function() {
+        this.imageObject = new Image();
+        this.imageObject.addEventListener('load', this._onImageLoadHandler, false);
+        this.imageObject.src = IMAGE_SRC;
 
         return this;
     };
@@ -79,12 +87,6 @@ define(function(require, exports, module) { // jshint ignore:line
      * @chainable
      */
     proto.enable = function() {
-        this.imageObject = new Image();
-        $(this.imageObject).load(function() {
-            this._onImageLoadHandler;
-        }, false);
-
-        this.imageObject.src = IMAGE_SRC;
 
         return this.render();
     };
@@ -107,14 +109,17 @@ define(function(require, exports, module) { // jshint ignore:line
      * @chainable
      */
     proto.render = function() {
-        this.imageManipulationController = new ImageManipulationController(this.$element.attr('id'), this.imageObject);
-
 
         return this.redraw();
     };
 
+    /**
+     * @method  _onImageLoad
+     * @for  App
+     */
     proto._onImageLoad = function() {
-        console.log('onLoad');
+        this.imageManipulationController = new ImageManipulationController(this.$element.attr('id'), this.imageObject);
+        this.imageManipulationController.drawModifiedImage();
 
         return this;
     };

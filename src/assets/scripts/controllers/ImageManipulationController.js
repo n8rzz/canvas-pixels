@@ -174,6 +174,11 @@ define(function(require, module, exports) {
         return this;
     };
 
+    /**
+     * @method drawOriginalImage
+     * @for ImageManipulationController
+     * @returns {proto}
+     */
     proto.drawOriginalImage = function() {
         this.context.drawImage(this.imageObject, 0, 0);
 
@@ -189,11 +194,9 @@ define(function(require, module, exports) {
      * @chainable
      */
     proto.drawModifiedImage = function(invertedRowHeight) {
-        console.log('modifiedDraw');
-
         this.clearCurrentImageFromCanvas();
 
-        this.context.drawImage(this.imageObject, 0, 0);
+        this.context.drawImage(this.copyOfImageObject, 0, 0);
         this.imageObjectData = this.context.getImageData(0, 0, this.width, this.height);
         this.invertedRowHeight = invertedRowHeight;
 
@@ -223,20 +226,30 @@ define(function(require, module, exports) {
     proto.modifyImagePixels = function(dataToModify) {
         var x;
         var y;
-        var doubleRowHeight = this.invertedRowHeight * 2;
+        var shouldChange;
 
         for (y = 0; y < this.height; y++) {
             for (x = 0; x < this.width; x++) {
 
-                if (y % doubleRowHeight >= this.invertedRowHeight &&
-                    y % doubleRowHeight <= (doubleRowHeight - 1)) {
+                shouldChange = this.shouldPixelsBeModified(y, x);
+                if (shouldChange) {
                     this.modifyImagePixelsInRow(x, y, dataToModify);
-
                 }
             }
         }
 
         return this;
+    };
+
+    /**
+     * @method shouldPixelsBeModified
+     * @for ImageManipulationController
+     * @param y {number}
+     * @param x {number}
+     * @returns {boolean}
+     */
+    proto.shouldPixelsBeModified = function (y, x) {
+        return y % this.invertedRowHeight < y % (this.invertedRowHeight * 2);
     };
 
     /**

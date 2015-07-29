@@ -231,7 +231,7 @@ define(function(require, module, exports) {
         for (y = 0; y < this.height; y++) {
             for (x = 0; x < this.width; x++) {
 
-                shouldChange = this.shouldPixelsBeModified(y, x);
+                shouldChange = this.shouldModifyPixels(x, y);
                 if (shouldChange) {
                     this.modifyImagePixelsInRow(x, y, dataToModify);
                 }
@@ -242,13 +242,13 @@ define(function(require, module, exports) {
     };
 
     /**
-     * @method shouldPixelsBeModified
+     * @method shouldModifyPixels
      * @for ImageManipulationController
      * @param y {number}
      * @param x {number}
      * @returns {boolean}
      */
-    proto.shouldPixelsBeModified = function (y, x) {
+    proto.shouldModifyPixels = function (x, y) {
         return y % this.invertedRowHeight < y % (this.invertedRowHeight * 2);
     };
 
@@ -270,6 +270,7 @@ define(function(require, module, exports) {
         data[i + RGB_COLORS.RED] = 255 - data[i + RGB_COLORS.RED];
         data[i + RGB_COLORS.GREEN] = 255 - data[i + RGB_COLORS.GREEN];
         data[i + RGB_COLORS.BLUE] = 255 - data[i + RGB_COLORS.BLUE];
+        data[i + RGB_COLORS.ALPHA] = data[i + RGB_COLORS.ALPHA];
 
         return this;
     };

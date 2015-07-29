@@ -16,7 +16,7 @@ define(function(require, exports, module) { // jshint ignore:line
      *
      * @type {number}
      */
-    var INVERTED_ROW_HEIGHT = 4;
+    var INVERTED_ROW_HEIGHT = 10;
     /**
      * Initial application setup. Runs once upon every page load.
      *
@@ -130,8 +130,6 @@ define(function(require, exports, module) { // jshint ignore:line
      * @for App
      */
     proto._onImageLoad = function() {
-        var invertedRowHeight = 4;
-
         this.imageManipulationController = new ImageManipulationController(this.$element.attr('id'), this.imageObject);
         this.imageManipulationController.drawOriginalImage();
         this.imageManipulationController.drawModifiedImage(INVERTED_ROW_HEIGHT);

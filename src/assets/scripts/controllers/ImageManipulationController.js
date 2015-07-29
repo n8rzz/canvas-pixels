@@ -7,13 +7,26 @@ define(function(require, module, exports) {
     var $ = require('jquery');
 
     /**
+     *
+     * @type {{RED: number, GREEN: number, BLUE: number}}
+     */
+    var RGB_COLORS = {
+        RED: 0,
+        GREEN: 1,
+        BLUE: 2,
+        ALPHA: 3,
+        COMPONENTS: 4
+    };
+
+    /**
      * Image Manipulation Controller
      *
      * @class ImageManipulationController
-     * @param {jquery} $elementOrUndefined
+     * @param {string} elementOrUndefined
+     * @param {string} imageObjectOrUndefined
      */
-    var ImageManipulationController = function(elementOrUndefined, $imageObjectOrUndefined) {
-        return this.init(elementOrUndefined, $imageObjectOrUndefined);
+    var ImageManipulationController = function(elementOrUndefined, imageObjectOrUndefined) {
+        return this.init(elementOrUndefined, imageObjectOrUndefined);
     };
 
     var proto = ImageManipulationController.prototype;
@@ -22,27 +35,34 @@ define(function(require, module, exports) {
      * Initialize the Controller
      *
      * @method init
-     * @param  {jquery} elementOrUndefined [element|null|undefinied]
+     * @param  {string} elementOrUndefined [element|null|undefined]
+     * @param {string} imageObjectOrUndefined
      * @for ImageManipulationController
      * @chainable
      */
-    proto.init = function(elementOrUndefined, $imageObjectOrUndefined) {
+    proto.init = function(elementOrUndefined, imageObjectOrUndefined) {
         /**
          * Base DOM element
          *
-         * @param $element
-         * @type {jquery} #canvasImage
-         * @default $elementOrUndefined || null;
+         * @param element
+         * @type {string} #canvasImage
+         * @default elementOrUndefined || null;
          */
         this.element = elementOrUndefined || null;
         /**
          * Image object with information to be manipulated
          *
-         * @param $imageObject
-         * @type {jquery} <img />
-         * @default $imageObjectOrUndefined || null;
+         * @param imageObject
+         * @type {object} <img/>
+         * @default imageObjectOrUndefined || null;
          */
-        this.$imageObject = $imageObjectOrUndefined || null;
+        this.imageObject = imageObjectOrUndefined || null;
+
+        /**
+         * @param copyOfImageObject
+         * @type {null}
+         */
+        this.copyOfImageObject = null;
 
         /**
          * @param canvas
@@ -50,10 +70,10 @@ define(function(require, module, exports) {
          */
         this.canvas = '';
         /**
-         * @param ctx
+         * @param context
          * @type {string}
          */
-        this.ctx = '';
+        this.context = '';
         /**
          * Canvas width
          * @param width
@@ -72,14 +92,24 @@ define(function(require, module, exports) {
          */
         this.imageObjectData = '';
         /**
-         * @param invertedRowWidth
+         * @param invertedRowHeight
          * @type {Number}
          */
-        this.invertedRowWidth = -1;
+        this.invertedRowHeight = -1;
 
+        return this.setupHandlers()
+                    .createChildren()
+                    .enable();
+    };
 
-        return this.createChildren()
-                   .enable();
+    /**
+     * @method setupHandlers
+     * @for ImageManipulationController
+     * @chainable
+     */
+    proto.setupHandlers = function() {
+
+        return this;
     };
 
     /**
@@ -91,12 +121,10 @@ define(function(require, module, exports) {
      */
     proto.createChildren = function() {
         this.canvas = document.getElementById(this.element);
-        this.ctx = this.canvas.getContext('2d');
-        this.width = this.$imageObject.width;
-        this.height = this.$imageObject.height;
-        this.invertedRowWidth = 4;
-
-        this.ctx.drawImage(this.$imageObject, 0, 0);
+        this.context = this.canvas.getContext('2d');
+        this.copyOfImageObject = this.imageObject;
+        this.width = this.imageObject.width;
+        this.height = this.imageObject.height;
 
         return this;
     };
@@ -110,7 +138,7 @@ define(function(require, module, exports) {
      */
     proto.enable = function() {
 
-        return this.drawModifiedImage();
+        return this;
     };
 
     /**
@@ -134,13 +162,25 @@ define(function(require, module, exports) {
      */
     proto.destroy = function() {
         this.element = null;
-        this.$imageObject = null;
+        this.imageObject = null;
         this.canvas = '';
-        this.ctx = '';
+        this.context = '';
         this.width = -1;
         this.height = -1;
         this.imageObjectData = '';
-        this.invertedRowWidth = -1;
+        this.invertedRowHeight = -1;
+        this.copyOfImageObject = null;
+
+        return this;
+    };
+
+    /**
+     * @method drawOriginalImage
+     * @for ImageManipulationController
+     * @returns {proto}
+     */
+    proto.drawOriginalImage = function() {
+        this.context.drawImage(this.imageObject, 0, 0);
 
         return this;
     };
@@ -150,17 +190,28 @@ define(function(require, module, exports) {
      *
      * @method drawModifiedImage
      * @for ImageManipulationController
+     * @param invertedRowHeight
      * @chainable
      */
-    proto.drawModifiedImage = function() {
-        var ctx = this.ctx;
+    proto.drawModifiedImage = function(invertedRowHeight) {
+        this.clearCurrentImageFromCanvas();
 
-        this.imageObjectData = ctx.getImageData(0, 0, this.width, this.height);
+        this.context.drawImage(this.copyOfImageObject, 0, 0);
+        this.imageObjectData = this.context.getImageData(0, 0, this.width, this.height);
+        this.invertedRowHeight = invertedRowHeight;
+
         this.modifyImagePixels(this.imageObjectData.data);
-
-        ctx.putImageData(this.imageObjectData, 0, 0);
+        this.context.putImageData(this.imageObjectData, 0, 0);
 
         return this;
+    };
+
+    /**
+     * @method clearCurrentImageFromCanvas
+     * @for ImageManipulationController
+     */
+    proto.clearCurrentImageFromCanvas = function() {
+        this.context.fillRect(0, 0, this.width, this.height);
     };
 
     /**
@@ -173,16 +224,17 @@ define(function(require, module, exports) {
      * @chainable
      */
     proto.modifyImagePixels = function(dataToModify) {
-        var h;
-        var doubleRowWidth = this.invertedRowWidth * 2;
+        var x;
+        var y;
+        var shouldChange;
 
-        for (h = 0; h < this.height; h += this.invertedRowWidth) {
-            if (h % doubleRowWidth === 0) {
-                do {
-                    h++;
-                    this.modifyImagePixelsInRow(h, dataToModify);
+        for (y = 0; y < this.height; y++) {
+            for (x = 0; x < this.width; x++) {
 
-                } while (h % doubleRowWidth !== this.invertedRowWidth);
+                shouldChange = this.shouldPixelsBeModified(y, x);
+                if (shouldChange) {
+                    this.modifyImagePixelsInRow(x, y, dataToModify);
+                }
             }
         }
 
@@ -190,26 +242,35 @@ define(function(require, module, exports) {
     };
 
     /**
-     * Step through each pixel in the row and invert the rgb color values
+     * @method shouldPixelsBeModified
+     * @for ImageManipulationController
+     * @param y {number}
+     * @param x {number}
+     * @returns {boolean}
+     */
+    proto.shouldPixelsBeModified = function (y, x) {
+        return y % this.invertedRowHeight < y % (this.invertedRowHeight * 2);
+    };
+
+    /**
+     * Step through each pixel by channel and change pixel value
      *
      * @method modifyImagePixelsInRow
-     * @param heightIndex
+     * @param x
+     * @param y
      * @param pixelDataToModify
      * @for ImageManipulationController
      * @chainable
      */
-    proto.modifyImagePixelsInRow = function(heightIndex, pixelDataToModify) {
-        var w;
-        var h = heightIndex;
+    proto.modifyImagePixelsInRow = function(x, y, pixelDataToModify) {
         var i;
         var data = pixelDataToModify;
 
-        for (w = 0; w < this.width; w ++) {
-            i = (h * this.width + w) * 4;
-            data[i] = 255 - data[i];
-            data[i + 1] = 255 - data[i + 1];
-            data[i + 2] = 255 - data[i + 2];
-        }
+        i = (y * this.width + x) * RGB_COLORS.COMPONENTS;
+        data[i + RGB_COLORS.RED] = 255 - data[i + RGB_COLORS.RED];
+        data[i + RGB_COLORS.GREEN] = 255 - data[i + RGB_COLORS.GREEN];
+        data[i + RGB_COLORS.BLUE] = 255 - data[i + RGB_COLORS.BLUE];
+
         return this;
     };
 

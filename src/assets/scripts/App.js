@@ -13,6 +13,11 @@ define(function(require, exports, module) { // jshint ignore:line
     var IMAGE_SRC = 'assets/media/images/learn-all-the-canvases.jpg';
 
     /**
+     *
+     * @type {number}
+     */
+    var INVERTED_ROW_HEIGHT = 4;
+    /**
      * Initial application setup. Runs once upon every page load.
      *
      * @class App
@@ -34,20 +39,43 @@ define(function(require, exports, module) { // jshint ignore:line
         /**
          * Base DOM element
          *
+         * @param $element
          * @type {jquery}
          * @default #canvasImage
          */
         this.$element = $elementOrUndefined || null;
 
         /**
-         *
+         * @param imageObject
+         * @type {object}
+         * @default null
+         */
+        this.imageObject = null;
+
+        /**
+         * @param imageMnipulationcontroller
          * @type {Object}
+         * @default null
          */
         this.imageManipulationController = null;
 
 
-        return this.createChildren()
+        return this.setupHandlers()
+                    .createChildren()
                     .enable();
+    };
+
+    /**
+     *
+     *
+     * @method setupHandlers
+     * @chainable
+     */
+    proto.setupHandlers = function() {
+        this._onImageLoadHandler = $.proxy(this._onImageLoad, this);
+        this.imageManipulationControllerHandler = $.proxy(this.imageManipulationController, this);
+
+        return this;
     };
 
     /**
@@ -57,6 +85,9 @@ define(function(require, exports, module) { // jshint ignore:line
      * @chainable
      */
     proto.createChildren = function() {
+        this.imageObject = new Image();
+        this.imageObject.addEventListener('load', this._onImageLoadHandler, false);
+        this.imageObject.src = IMAGE_SRC;
 
         return this;
     };
@@ -90,17 +121,22 @@ define(function(require, exports, module) { // jshint ignore:line
      * @chainable
      */
     proto.render = function() {
-        var $element = this.$element;
-        var $imageObject = new Image();
-
-        $($imageObject).load(function() {
-            debugger;
-            this.imageManipulationController = new ImageManipulationController($element.attr('Id'), $imageObject);
-        });
-
-        $imageObject.src = IMAGE_SRC;
 
         return this.redraw();
+    };
+
+    /**
+     * @method  _onImageLoad
+     * @for App
+     */
+    proto._onImageLoad = function() {
+        var invertedRowHeight = 4;
+
+        this.imageManipulationController = new ImageManipulationController(this.$element.attr('id'), this.imageObject);
+        this.imageManipulationController.drawOriginalImage();
+        this.imageManipulationController.drawModifiedImage(INVERTED_ROW_HEIGHT);
+
+        return this;
     };
 
     return App;

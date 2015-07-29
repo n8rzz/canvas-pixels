@@ -23,8 +23,7 @@
     <h1>All the pixels</h1>
 
     <!-- JAVASCRIPT -->
-    <script src="assets/vendor/requirejs/require.js"></script>
-    <script src="assets/scripts/config.js"></script>
+    <script src="assets/vendor/requirejs/require.js" data-main="config.js"></script>
     <script>
         /**
          * Global constants
@@ -96,7 +95,7 @@
             baseUrl: SETTINGS.SCRIPT_PATH,
 
             // Params to append to the end of each js file request
-            urlArgs: 'v=' + SETTINGS.APP_VERSION + SETTINGS.CACHE_BUSTER
+            urlArgs: '',// 'v=' + SETTINGS.APP_VERSION + SETTINGS.CACHE_BUSTER
         });
 
         /**

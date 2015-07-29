@@ -13,6 +13,11 @@ define(function(require, exports, module) { // jshint ignore:line
     var IMAGE_SRC = 'assets/media/images/learn-all-the-canvases.jpg';
 
     /**
+     *
+     * @type {number}
+     */
+    var INVERTED_ROW_HEIGHT = 4;
+    /**
      * Initial application setup. Runs once upon every page load.
      *
      * @class App
@@ -34,16 +39,23 @@ define(function(require, exports, module) { // jshint ignore:line
         /**
          * Base DOM element
          *
+         * @param $element
          * @type {jquery}
          * @default #canvasImage
          */
         this.$element = $elementOrUndefined || null;
 
+        /**
+         * @param imageObject
+         * @type {object}
+         * @default null
+         */
         this.imageObject = null;
 
         /**
-         *
+         * @param imageMnipulationcontroller
          * @type {Object}
+         * @default null
          */
         this.imageManipulationController = null;
 
@@ -115,11 +127,14 @@ define(function(require, exports, module) { // jshint ignore:line
 
     /**
      * @method  _onImageLoad
-     * @for  App
+     * @for App
      */
     proto._onImageLoad = function() {
+        var invertedRowHeight = 4;
+
         this.imageManipulationController = new ImageManipulationController(this.$element.attr('id'), this.imageObject);
-        this.imageManipulationController.drawModifiedImage();
+        this.imageManipulationController.drawOriginalImage();
+        this.imageManipulationController.drawModifiedImage(INVERTED_ROW_HEIGHT);
 
         return this;
     };

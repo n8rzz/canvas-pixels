@@ -97,8 +97,19 @@ define(function(require, module, exports) {
          */
         this.invertedRowHeight = -1;
 
-        return this.createChildren()
-                   .enable();
+        return this.setupHandlers()
+                    .createChildren()
+                    .enable();
+    };
+
+    /**
+     * @method setupHandlers
+     * @for ImageManipulationController
+     * @chainable
+     */
+    proto.setupHandlers = function() {
+
+        return this;
     };
 
     /**
@@ -127,7 +138,7 @@ define(function(require, module, exports) {
      */
     proto.enable = function() {
 
-        return this.drawOriginalImage();
+        return this;
     };
 
     /**
@@ -164,10 +175,7 @@ define(function(require, module, exports) {
     };
 
     proto.drawOriginalImage = function() {
-        console.log('originalDraw');
-        var context = this.context;
-        this.imageObjectData = context.getImageData(0, 0, this.width, this.height);
-        context.drawImage(this.imageObject, 0, 0);
+        this.context.drawImage(this.imageObject, 0, 0);
 
         return this;
     };
@@ -177,19 +185,30 @@ define(function(require, module, exports) {
      *
      * @method drawModifiedImage
      * @for ImageManipulationController
+     * @param invertedRowHeight
      * @chainable
      */
-    proto.drawModifiedImage = function() {
+    proto.drawModifiedImage = function(invertedRowHeight) {
         console.log('modifiedDraw');
-        var context = this.context;
-        this.imageObjectData = context.getImageData(0, 0, this.width, this.height);
-        this.invertedRowHeight = 4;
+
+        this.clearCurrentImageFromCanvas();
+
+        this.context.drawImage(this.imageObject, 0, 0);
+        this.imageObjectData = this.context.getImageData(0, 0, this.width, this.height);
+        this.invertedRowHeight = invertedRowHeight;
 
         this.modifyImagePixels(this.imageObjectData.data);
-
-        context.putImageData(this.imageObjectData, 0, 0);
+        this.context.putImageData(this.imageObjectData, 0, 0);
 
         return this;
+    };
+
+    /**
+     * @method clearCurrentImageFromCanvas
+     * @for ImageManipulationController
+     */
+    proto.clearCurrentImageFromCanvas = function() {
+        this.context.fillRect(0, 0, this.width, this.height);
     };
 
     /**
